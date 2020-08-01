@@ -1,0 +1,52 @@
+\documentclass[]{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{url}
+%opening
+\title{Dynamics Derivation for Cart Inverted Pendulum}
+\author{Tianpeng Zhang}
+
+\begin{document}
+
+\maketitle
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=0.7\linewidth]{"System Diagram"}
+	\caption{System Diagram for cart inverted pendulum. We assume the rod on the cart is a rigid straight rod with uniform mass distribution. The positive direction of rod rotation is chosen as pointing towards negative z direction as shown in the diagram.}
+	\label{fig:system-diagram}
+\end{figure}
+
+As a correction to the old lab notes, the equation of motion for the system should be
+
+\begin{equation}\label{eq:eqofmotion}
+\begin{split}
+&(m_c+m_p)\ddot{x}+c\dot{x}=F + m_p r(\sin\theta~ \dot{\theta}^2 - \cos\theta~ \ddot{\theta})\\
+& (J+m_p r^2)\ddot{\theta} + \gamma \dot{\theta} = m_p r g \sin\theta - m_p r \ddot{x} \cos\theta
+\end{split}
+\end{equation}
+
+Denote $M=m_c+m_p, R=m_p r, K = J + m_p r^2$, the equations above simplifies as
+\begin{equation}\label{eq:eqofmotion2}
+\begin{split}
+&M\ddot{x}+c\dot{x}=F +R(\sin\theta~ \dot{\theta}^2 - \cos\theta~ \ddot{\theta})\\
+& K\ddot{\theta} + \gamma \dot{\theta} = R g \sin\theta -  R \ddot{x} \cos\theta
+\end{split}
+\end{equation}
+
+And we have 
+\begin{equation}\label{eq:dotx}
+	\ddot{x} = \frac{Rg\sin\theta - K \ddot{\theta} -\gamma \dot{\theta}}{R\cos \theta}
+\end{equation}
+
+Substitute this back to \eqref{eq:eqofmotion2}, get $\ddot{\theta}$ as
+
+\begin{equation}
+	\ddot{\theta} = \frac{M\gamma \dot{\theta}-MgR\sin\theta + (F-c\dot{x} + R\sin\theta~\dot{\theta}^2)R\cos\theta}{-MK+R^2\cos^2\theta}
+\end{equation}
+
+With $\ddot{\theta}$ we can use \eqref{eq:dotx} to calculate $\ddot{x}$ already. Nonetheless, we also give the explicit formula for $\ddot{x}$ as below
+\begin{equation}\label{eq:explicitddotx}
+	\ddot{x} = \frac{R^2 g \sin\theta\cos\theta - K(F-c\dot{x}+R\sin\theta~\dot{\theta}^2)-\gamma R \dot{\theta} \cos\theta}{-MK+R^2\cos^2 \theta}
+\end{equation}
+\end{document}
