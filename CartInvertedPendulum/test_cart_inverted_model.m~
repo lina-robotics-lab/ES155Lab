@@ -13,17 +13,16 @@ x0 = [0;pi/4;0;0];
 model = cart_inverted_model(x0,g,mp,l,r,J,gamma,mc,c);
 t0 = 0 ;
 dt = 0.01;
-t_end = 10;
+t_end = 20;
 
 t = t0;
+xlim([0 t_end])
+yl
 for i =1:floor((t_end-t0)/dt)
 model.simulate(0,dt);
 scatter(t,model.s(2));
-% title("sim time="+t);
-xlim([0 t_end]);
-ylim([0 5]);
 hold on;
 t=t+dt;
-pause(dt/3);
+pause(dt);
 end
 hold off;
