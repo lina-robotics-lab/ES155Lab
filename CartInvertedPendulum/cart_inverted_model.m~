@@ -1,6 +1,4 @@
-classdef cart_inverted_model<handle
-    % We must define the class to inherit from 'handle' in order to be able
-    % to modify its properties.
+classdef cart_inverted_model
    properties
         g=9.81;
         mp=.23;
@@ -13,13 +11,13 @@ classdef cart_inverted_model<handle
         M=0;
         R=0;
         K=0;
-        s0 = [0;0;0;0];
-        s = [0;0;0;0];
+        sa0 = [0;0;0;0];
+        x = [0;0;0;0];
    end
-   methods(Access=public)
-      function obj = cart_inverted_model(s0,g,mp,l,r,J,gamma,mc,c)
-          obj.s0 = s0;
-          obj.s = s0;
+   methods
+      function obj = cart_inverted_model(state0,g,mp,l,r,J,gamma,mc,c)
+          obj.state0 = state0;
+          obj.state = state0;
           
           obj.g = g;
           obj.mp = mp;
@@ -39,30 +37,29 @@ classdef cart_inverted_model<handle
           % Simulate the system under the influence of input u for
           % time_duration amount of time.
         
-        curr_s = obj.s;      
+        x0 = obj.state;      
         params = {obj.g, obj.M, obj.R, obj.K, obj.c, obj.gamma} ;
 
         Tspan = [0 time_duration];
         
         % time domain ODE simulaiton
-        [t,new_s] = ode45(@(t,s) stateTransFunc(t,s,u,params),Tspan,curr_s);        
+        [t,x] = ode45(@(t,x) stateTransFunc(t,x,u,params),Tspan,x0);        
         
         % Update the object state.
-        obj.s(:) = new_s(end,:);
-
+        obj.state = x(end);
         
         % The local helper function
-        function xdot=stateTransFunc(t,s,u,params)
+        function xdot=stateTransFunc(t,x,u,params)
             [g, M, R, K, c, gamma] = params{:} ;
             % State vector s=(x,theta, dx/dt,dtheta/dt)
             F = u;
-            v = s(3);
-            theta = s(2);
-            omega = s(4);
+            v = x(3);
+            theta = x(2);
+            omega = x(4);
 
             xdot = [0; 0; 0; 0];
-            xdot(1)=s(3);
-            xdot(2)=s(4);
+            xdot(1)=x(3);
+            xdot(2)=x(4);
 
             xdot(4) = M*gamma*omega - M*g*R*sin(theta) + (F-c*v+R*sin(theta)*omega^2)*R*cos(theta);
             xdot(4) = xdot(4)/(R^2*cos(theta)^2-M*K);
