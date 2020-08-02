@@ -17,7 +17,7 @@ noise_mag=1;
 % Initial state.
 % Recall state vector s=(x,theta, dx/dt,dtheta/dt)
 
-s0 = [0;pi/4;0;0];
+s0 = [0;pi/8;0;0];
 
 % Create cart inverted pendulum simulator
 model = cart_inverted_model(s0,g,mp,l,r,J,gamma,mc,c);
@@ -26,7 +26,7 @@ model = cart_inverted_model(s0,g,mp,l,r,J,gamma,mc,c);
 t0 = 0;
 t = t0;
 dt = 0.03;
-t_end = 10;
+t_end = 20;
 
 % Specify some animation related parameters.
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0.04, 1, 0.96]*0.5);

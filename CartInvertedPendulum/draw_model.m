@@ -1,13 +1,13 @@
 
 
 function ax=draw_model(ax,model)
-        canvas_size_ratio = 4;
+        canvas_size_ratio = 1.5;
         aspect_ratio = 1;
         xl = [-1,1]* canvas_size_ratio * model.l * aspect_ratio;
         yl = [-0.2,1]*canvas_size_ratio * model.l;
 
-        width = 0.5*model.l;
-        height = 0.2*model.l;
+        width = 0.2;
+        height = 0.1;
         x = model.s(1)-1/2*width;
         y=0-height;
 
