@@ -15,6 +15,7 @@ classdef cart_inverted_model<handle
         K=0;
         s0 = [0;0;0;0];
         s = [0;0;0;0];
+        process_noise_mag=1;
    end
    % Events detectable by the outside world.
    events
@@ -22,7 +23,7 @@ classdef cart_inverted_model<handle
        simulationDone
    end
    methods(Access=public)
-      function obj = cart_inverted_model(s0,g,mp,l,r,J,gamma,mc,c)
+      function obj = cart_inverted_model(s0,g,mp,l,r,J,gamma,mc,c,process_noise_mag)
           obj.s0 = s0;
           obj.s = s0;
           
@@ -35,6 +36,8 @@ classdef cart_inverted_model<handle
           obj.mc = mc;
           obj.c = c;
           
+          obj.process_noise_mag=process_noise_mag;
+          
         obj.M=mc+mp;
         obj.R=mp*r;
         obj.K=J+mp*r^2;
@@ -43,7 +46,6 @@ classdef cart_inverted_model<handle
       end
       
       function requestSimulateCallback(obj,event)
-%           disp('request received');
           obj.simulate(event.u,event.dt);
           notify(obj,'simulationDone');
       end
@@ -57,6 +59,8 @@ classdef cart_inverted_model<handle
         Tspan = [0 time_duration];
         
         % time domain ODE simulaiton
+        % Adding process noise
+        u = u + (rand()-0.5)*obj.process_noise_mag;
         [t,new_s] = ode45(@(t,s) stateTransFunc(t,s,u,params),Tspan,curr_s);        
         
         % Update the object state.
@@ -68,6 +72,7 @@ classdef cart_inverted_model<handle
             [g, M, R, K, c, gamma] = params{:} ;
             % State vector s=(x,theta, dx/dt,dtheta/dt)
             F = u;
+            
             v = s(3);
             theta = s(2);
             omega = s(4);

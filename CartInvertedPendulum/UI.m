@@ -1,4 +1,4 @@
-classdef UI_exported < matlab.apps.AppBase
+classdef UI < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
@@ -11,7 +11,7 @@ classdef UI_exported < matlab.apps.AppBase
         KvSpinner                   matlab.ui.control.Spinner
         KxSpinnerLabel              matlab.ui.control.Label
         KxSpinner                   matlab.ui.control.Spinner
-        KthetaSpinnerLabel          matlab.ui.control.Label
+        KthetaSpinnerLabel         matlab.ui.control.Label
         KthetaSpinner               matlab.ui.control.Spinner
         KomegaSpinnerLabel          matlab.ui.control.Label
         KomegaSpinner               matlab.ui.control.Spinner
@@ -21,13 +21,13 @@ classdef UI_exported < matlab.apps.AppBase
         PControllerButton           matlab.ui.control.RadioButton
         UIAxes                      matlab.ui.control.UIAxes
         u
-        dt
+        frame_rate
     end
     % The list of events detectable to the outside world.
     events
         Reset
         ChangeInitialAngle
-        RequestModelState
+        RequestSimulate
     end
     methods (Access = public)
         function updateAxes(app,ext_model)
@@ -71,22 +71,22 @@ classdef UI_exported < matlab.apps.AppBase
         function StartSimulationButtonValueChanged(app, event)
             value = app.StartSimulationButton.Value;
             if app.StartSimulationButton.Value==1
-%                 disp('starting')
-                % The state has changed to running simulation.
+               % The state has changed to running simulation.
                 app.InitialAngledegSlider.Enable='off';
                 app.InitialAngledegSliderLabel.Enable='off';
                 app.StartSimulationButton.Text = 'Press to Pause';
             else
-%                 disp('pausing')
                 % The state has changed to pausing.
                 app.StartSimulationButton.Text = 'Start Simulation';
             end
-                 
+            
+            % Spin on this loop, keep requesting to simulate forward the
+            % model, until the StartSimulationButton is clicked again.
             while isprop(app,'StartSimulationButton')==1 && app.StartSimulationButton.Value==1
-%                 disp('Request for simulation');
+                notify(app,'RequestSimulate');
+                pause(1/app.frame_rate);
+%                 pause(0.05);
 %                 disp(rand());
-                notify(app,'RequestModelState');
-                pause(app.dt);
             end
            
         end
@@ -111,140 +111,143 @@ classdef UI_exported < matlab.apps.AppBase
 
     % Component initialization
     methods (Access = private)
-        % Create UIFigure and components
+     % Create UIFigure and components
         function createComponents(app)
 
             % Create UIFigure and hide until all components are created
             app.UIFigure = uifigure('Visible', 'off');
-            app.UIFigure.Position = [100 100 877 554];
+            app.UIFigure.Position = [100 100 868 512];
             app.UIFigure.Name = 'MATLAB App';
 
             % Create StartSimulationButton
             app.StartSimulationButton = uibutton(app.UIFigure, 'state');
             app.StartSimulationButton.ValueChangedFcn = createCallbackFcn(app, @StartSimulationButtonValueChanged, true);
             app.StartSimulationButton.Text = 'Start Simulation';
-            app.StartSimulationButton.FontSize = 20;
-            app.StartSimulationButton.Position = [38 71 157 31];
+            app.StartSimulationButton.FontSize = 16;
+            app.StartSimulationButton.Position = [65 92 128 26];
 
             % Create ResetButton
             app.ResetButton = uibutton(app.UIFigure, 'push');
             app.ResetButton.ButtonPushedFcn = createCallbackFcn(app, @ResetButtonPushed, true);
-            app.ResetButton.FontSize = 20;
-            app.ResetButton.Position = [205 71 144 31];
+            app.ResetButton.FontSize = 16;
+            app.ResetButton.Position = [204 92 100 26];
             app.ResetButton.Text = 'Reset';
 
             % Create InitialAngledegSliderLabel
             app.InitialAngledegSliderLabel = uilabel(app.UIFigure);
             app.InitialAngledegSliderLabel.HorizontalAlignment = 'right';
-            app.InitialAngledegSliderLabel.FontSize = 20;
-            app.InitialAngledegSliderLabel.Position = [24 424 156 24];
+            app.InitialAngledegSliderLabel.FontSize = 14;
+            app.InitialAngledegSliderLabel.Position = [28 422 111 22];
             app.InitialAngledegSliderLabel.Text = 'Initial Angle(deg)';
 
             % Create InitialAngledegSlider
             app.InitialAngledegSlider = uislider(app.UIFigure);
-            app.InitialAngledegSlider.Limits = [0 360];
+            app.InitialAngledegSlider.Limits = [-180 180];
             app.InitialAngledegSlider.ValueChangingFcn = createCallbackFcn(app, @InitialAngledegSliderValueChanging, true);
-            app.InitialAngledegSlider.FontSize = 20;
-            app.InitialAngledegSlider.Position = [195 436 194 3];
-
-            % Create KthetaSpinner_2Label
-            app.KthetaSpinnerLabel = uilabel(app.UIFigure);
-            app.KthetaSpinnerLabel.HorizontalAlignment = 'right';
-            app.KthetaSpinnerLabel.FontSize = 20;
-            app.KthetaSpinnerLabel.Enable = 'off';
-            app.KthetaSpinnerLabel.Position = [226 303 63 24];
-            app.KthetaSpinnerLabel.Text = 'Ktheta';
-            
-
-            % Create KthetaSpinner
-            app.KthetaSpinner = uispinner(app.UIFigure);
-            app.KthetaSpinner.FontSize = 20;
-            app.KthetaSpinner.Enable = 'off';
-            app.KthetaSpinner.Position = [304 302 100 25];
-            app.KthetaSpinner.Value = 15.7;
+            app.InitialAngledegSlider.FontSize = 14;
+            app.InitialAngledegSlider.Position = [154 432 177 3];
 
             % Create KxSpinnerLabel
             app.KxSpinnerLabel = uilabel(app.UIFigure);
             app.KxSpinnerLabel.HorizontalAlignment = 'right';
-            app.KxSpinnerLabel.FontSize = 20;
+            app.KxSpinnerLabel.FontSize = 16;
             app.KxSpinnerLabel.Enable = 'off';
-            app.KxSpinnerLabel.Position = [254 339 34 24];
+            app.KxSpinnerLabel.Position = [209 347 29 22];
             app.KxSpinnerLabel.Text = 'Kx ';
 
             % Create KxSpinner
             app.KxSpinner = uispinner(app.UIFigure);
-            app.KxSpinner.FontSize = 20;
+            app.KxSpinner.Step = 0.01;
+            app.KxSpinner.FontSize = 16;
             app.KxSpinner.Enable = 'off';
-            app.KxSpinner.Position = [303 338 100 25];
+            app.KxSpinner.Position = [253 347 100 22];
             app.KxSpinner.Value = 0.572;
 
             % Create KvSpinnerLabel
             app.KvSpinnerLabel = uilabel(app.UIFigure);
             app.KvSpinnerLabel.HorizontalAlignment = 'right';
-            app.KvSpinnerLabel.FontSize = 20;
+            app.KvSpinnerLabel.FontSize = 16;
             app.KvSpinnerLabel.Enable = 'off';
-            app.KvSpinnerLabel.Position = [260 268 29 24];
+            app.KvSpinnerLabel.Position = [214 276 25 22];
             app.KvSpinnerLabel.Text = 'Kv';
 
             % Create KvSpinner
             app.KvSpinner = uispinner(app.UIFigure);
-            app.KvSpinner.FontSize = 20;
+            app.KvSpinner.Step = 0.01;
+            app.KvSpinner.FontSize = 16;
             app.KvSpinner.Enable = 'off';
-            app.KvSpinner.Position = [304 267 100 25];
+            app.KvSpinner.Position = [254 276 100 22];
             app.KvSpinner.Value = 2.12;
 
             % Create KomegaSpinnerLabel
             app.KomegaSpinnerLabel = uilabel(app.UIFigure);
             app.KomegaSpinnerLabel.HorizontalAlignment = 'right';
-            app.KomegaSpinnerLabel.FontSize = 20;
+            app.KomegaSpinnerLabel.FontSize = 16;
             app.KomegaSpinnerLabel.Enable = 'off';
-            app.KomegaSpinnerLabel.Position = [210 230 80 24];
+            app.KomegaSpinnerLabel.Position = [175 238 65 22];
             app.KomegaSpinnerLabel.Text = 'Komega';
 
             % Create KomegaSpinner
             app.KomegaSpinner = uispinner(app.UIFigure);
-            app.KomegaSpinner.FontSize = 20;
+            app.KomegaSpinner.Step = 0.01;
+            app.KomegaSpinner.FontSize = 16;
             app.KomegaSpinner.Enable = 'off';
-            app.KomegaSpinner.Position = [305 229 100 25];
+            app.KomegaSpinner.Position = [255 238 100 22];
             app.KomegaSpinner.Value = 4.02;
 
             % Create TextArea
             app.TextArea = uitextarea(app.UIFigure);
-            app.TextArea.FontSize = 20;
+            app.TextArea.FontSize = 16;
             app.TextArea.BackgroundColor = [0.9412 0.9412 0.9412];
-            app.TextArea.Position = [47 139 316 76];
+            app.TextArea.Position = [40 157 284 52];
             app.TextArea.Value = {'Press Left/Right Arrow Key to Directly Apply Forces on the Cart Body'};
 
             % Create ControlModeButtonGroup
             app.ControlModeButtonGroup = uibuttongroup(app.UIFigure);
             app.ControlModeButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @ControlModeButtonGroupSelectionChanged, true);
             app.ControlModeButtonGroup.Title = 'Control Mode';
-            app.ControlModeButtonGroup.FontSize = 20;
-            app.ControlModeButtonGroup.Position = [28 281 167 82];
+            app.ControlModeButtonGroup.FontSize = 16;
+            app.ControlModeButtonGroup.Position = [12 265 153 77];
 
             % Create ArrowKeyOnlyButton
             app.ArrowKeyOnlyButton = uiradiobutton(app.ControlModeButtonGroup);
             app.ArrowKeyOnlyButton.Text = 'Arrow Key Only';
-            app.ArrowKeyOnlyButton.FontSize = 20;
-            app.ArrowKeyOnlyButton.Position = [11 26 161 23];
+            app.ArrowKeyOnlyButton.FontSize = 16;
+            app.ArrowKeyOnlyButton.Position = [11 27 133 22];
             app.ArrowKeyOnlyButton.Value = true;
 
             % Create PControllerButton
             app.PControllerButton = uiradiobutton(app.ControlModeButtonGroup);
             app.PControllerButton.Text = 'P Controller';
-            app.PControllerButton.FontSize = 20;
-            app.PControllerButton.Position = [11 4 128 23];
+            app.PControllerButton.FontSize = 16;
+            app.PControllerButton.Position = [11 6 106 22];
 
             % Create UIAxes
             app.UIAxes = uiaxes(app.UIFigure);
             title(app.UIAxes, '')
             xlabel(app.UIAxes, 'X')
             ylabel(app.UIAxes, 'Y')
-            app.UIAxes.Position = [428 46 428 411];
+            app.UIAxes.FontSize = 14;
+            app.UIAxes.Position = [409 70 413 374];
+
+            % Create KthetaSpinnerLabel
+            app.KthetaSpinnerLabel = uilabel(app.UIFigure);
+            app.KthetaSpinnerLabel.HorizontalAlignment = 'right';
+            app.KthetaSpinnerLabel.FontSize = 16;
+            app.KthetaSpinnerLabel.Enable = 'off';
+            app.KthetaSpinnerLabel.Position = [187 311 52 22];
+            app.KthetaSpinnerLabel.Text = 'Ktheta';
+
+            % Create KthetaSpinner
+            app.KthetaSpinner = uispinner(app.UIFigure);
+            app.KthetaSpinner.Step = 0.01;
+            app.KthetaSpinner.FontSize = 16;
+            app.KthetaSpinner.Enable = 'off';
+            app.KthetaSpinner.Position = [254 311 100 22];
+            app.KthetaSpinner.Value = 15.7;
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
-    
         end
     end
 
@@ -252,10 +255,10 @@ classdef UI_exported < matlab.apps.AppBase
     methods (Access = public)
 
         % Construct app
-        function app = UI_exported()
+        function app = UI()
             % Initialize default control input u.
             app.u = 0;
-            app.dt= 1/30;% Update the animation at 24 fps
+            app.frame_rate= 20;% Update the animation at 30 fps
             
             % Create UIFigure and components
             createComponents(app)
