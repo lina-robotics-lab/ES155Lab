@@ -47,7 +47,6 @@ for i =1:floor((t_end-t0)/dt)
     
     % Drawing the current model state.
     ax = gca;
-    cla(ax);
     draw_model(ax,model);
     title("sim time="+t0+i*dt);
     

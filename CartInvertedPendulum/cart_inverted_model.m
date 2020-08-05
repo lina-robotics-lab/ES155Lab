@@ -16,6 +16,11 @@ classdef cart_inverted_model<handle
         s0 = [0;0;0;0];
         s = [0;0;0;0];
    end
+   % Events detectable by the outside world.
+   events
+       requestSimulate
+       simulationDone
+   end
    methods(Access=public)
       function obj = cart_inverted_model(s0,g,mp,l,r,J,gamma,mc,c)
           obj.s0 = s0;
@@ -33,7 +38,14 @@ classdef cart_inverted_model<handle
         obj.M=mc+mp;
         obj.R=mp*r;
         obj.K=J+mp*r^2;
-
+        
+           addlistener(obj,'requestSimulate',@(obj,event) requestSimulateCallback(obj,event));
+      end
+      
+      function requestSimulateCallback(obj,event)
+%           disp('request received');
+          obj.simulate(event.u,event.dt);
+          notify(obj,'simulationDone');
       end
       function obj=simulate(obj,u,time_duration)
           % Simulate the system under the influence of input u for

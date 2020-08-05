@@ -1,6 +1,7 @@
 
 
 function ax=draw_model(ax,model)
+        cla(ax);
         canvas_size_ratio = 1.5;
         aspect_ratio = 1;
         xl = [-1,1]* canvas_size_ratio * model.l * aspect_ratio;
@@ -25,15 +26,16 @@ function ax=draw_model(ax,model)
         [v_x,v_y]=rotPoints([model.s(1) 0],-theta,v_x,v_y);
         pgon = polyshape(v_x,v_y);
         plot(ax,pgon,'FaceColor',[0.3,0.3,0.3],'EdgeColor','None');
-        axis equal;
-
-        hold on;
+        
+        hold(ax,'on');
+        
 
 
         % Draw Vertical Basis Line
-        plot(model.s(1)*[1 1],[0,yl(2)],'LineStyle','--')
-
-
+        plot(ax,model.s(1)*[1 1],[0,yl(2)],'LineStyle','--');
+        
+        hold(ax,'on');
+         
         % Draw Wheels
         wheel_d = width*0.2; 
         wheel_x = [x+1/5*width,x+3/5*width];
@@ -41,10 +43,13 @@ function ax=draw_model(ax,model)
         wheel_spec = [wheel_x(1),wheel_y(1),wheel_d,wheel_d];
                 % Use curved rectangle to draw wheels.
         rectangle('Parent',ax, 'Position',wheel_spec,'Curvature',[1 1],'FaceColor','k')
-        hold on;
+    
+        hold(ax,'on');
+         
         wheel_spec = [wheel_x(2),wheel_y(2),wheel_d,wheel_d];
         rectangle('Parent',ax, 'Position',wheel_spec,'Curvature',[1 1],'FaceColor','k')
-        hold on;
+     
+        hold(ax,'on');
 
         % Draw Pivot
         pivot_d = width*0.15; 
@@ -52,22 +57,25 @@ function ax=draw_model(ax,model)
         pivot_y = -0.5*pivot_d;
         pivot_spec = [pivot_x,pivot_y,pivot_d,pivot_d];
         rectangle('Parent',ax, 'Position',pivot_spec,'Curvature',[1 1],'FaceColor','w')
-        hold on;
+
+        hold(ax,'on');
 
         % Draw Cart Body
         rectangle('Parent',ax,'Position',[x y width height],"FaceColor",[196,154,71]/256,'EdgeColor','None','Curvature',[0.2,0.2])
-        hold on;
-
+         hold(ax,'on');
+   
 
         % Draw Ground
         plot(xl,[1 1]*(y-wheel_d/2),'Parent',ax,'Color','k');
-        hold on;
+         hold(ax,'on');
 
         % Set Aspect Ratio
-        set(ax,'DataAspectRatio',[1 1 1])
-        xlim(xl);
-        ylim(yl);
-
+        set(ax,'DataAspectRatio',[1 1 1]);
+   
+        hold(ax,'on');
+         
+        axis(ax,[xl yl])
+       
 % A helper function
     function [x_rot,y_rot]=rotPoints(origin,theta,x,y)
         x_diff = x-origin(1);
