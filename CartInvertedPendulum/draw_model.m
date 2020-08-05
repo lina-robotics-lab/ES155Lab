@@ -7,8 +7,8 @@ function ax=draw_model(ax,model)
         xl = [-1,1]* canvas_size_ratio * model.l * aspect_ratio;
         yl = [-0.2,1]*canvas_size_ratio * model.l;
 
-        width = 0.2;
-        height = 0.1;
+        width = 0.3;
+        height = 0.15;
         x = model.s(1)-1/2*width;
         y=0-height;
 
@@ -25,14 +25,14 @@ function ax=draw_model(ax,model)
         % increase, the theta here should take its negative.
         [v_x,v_y]=rotPoints([model.s(1) 0],-theta,v_x,v_y);
         pgon = polyshape(v_x,v_y);
-        plot(ax,pgon,'FaceColor',[0.3,0.3,0.3],'EdgeColor','None');
+        plot(ax,pgon,'FaceColor','b','EdgeColor','None');
         
         hold(ax,'on');
         
 
 
         % Draw Vertical Basis Line
-        plot(ax,model.s(1)*[1 1],[0,yl(2)],'LineStyle','--');
+        plot(ax,model.s(1)*[1 1],[0,yl(2)],'LineStyle','--','Color',[0.3,0.3,0.3]);
         
         hold(ax,'on');
          

@@ -4,24 +4,27 @@ classdef UI < matlab.apps.AppBase
     properties (Access = public)
         UIFigure                    matlab.ui.Figure
         StartSimulationButton       matlab.ui.control.StateButton
-        ResetButton                 matlab.ui.control.Button
+        ResetCartButton             matlab.ui.control.Button
         InitialAngledegSliderLabel  matlab.ui.control.Label
         InitialAngledegSlider       matlab.ui.control.Slider
-        KvSpinnerLabel              matlab.ui.control.Label
-        KvSpinner                   matlab.ui.control.Spinner
         KxSpinnerLabel              matlab.ui.control.Label
         KxSpinner                   matlab.ui.control.Spinner
-        KthetaSpinnerLabel         matlab.ui.control.Label
-        KthetaSpinner               matlab.ui.control.Spinner
+        KvSpinnerLabel              matlab.ui.control.Label
+        KvSpinner                   matlab.ui.control.Spinner
         KomegaSpinnerLabel          matlab.ui.control.Label
         KomegaSpinner               matlab.ui.control.Spinner
-        TextArea                    matlab.ui.control.TextArea
         ControlModeButtonGroup      matlab.ui.container.ButtonGroup
-        ArrowKeyOnlyButton          matlab.ui.control.RadioButton
+        FreeFallButton          matlab.ui.control.RadioButton
         PControllerButton           matlab.ui.control.RadioButton
         UIAxes                      matlab.ui.control.UIAxes
-        u
+        KthetaSpinnerLabel          matlab.ui.control.Label
+        KthetaSpinner               matlab.ui.control.Spinner
+        ResetGainsButton            matlab.ui.control.Button
         frame_rate
+        default_Kx
+        default_Ktheta
+        default_Kv
+        default_Komega
     end
     % The list of events detectable to the outside world.
     events
@@ -48,22 +51,10 @@ classdef UI < matlab.apps.AppBase
         function ControlModeButtonGroupSelectionChanged(app, event)
             selectedButton = app.ControlModeButtonGroup.SelectedObject;
             
-            if selectedButton.Text == "Arrow Key Only"
+            if selectedButton.Text == "Free Fall"
                 setPControllerVisibility(app,"off");
             else
                 setPControllerVisibility(app,"on");
-            end
-            
-            % A helper function to set the Visibility of P controller
-            % setters.
-            function setPControllerVisibility(app,on_off_flag)
-                tohide = [app.KvSpinner,app.KvSpinnerLabel,...
-                      app.KomegaSpinner,app.KomegaSpinnerLabel,...
-                      app.KthetaSpinner,app.KthetaSpinnerLabel,...
-                      app.KxSpinner,app.KxSpinnerLabel];
-                for h = tohide
-                    h.Enable = on_off_flag;
-                end
             end
         end
 
@@ -75,9 +66,13 @@ classdef UI < matlab.apps.AppBase
                 app.InitialAngledegSlider.Enable='off';
                 app.InitialAngledegSliderLabel.Enable='off';
                 app.StartSimulationButton.Text = 'Press to Pause';
+                app.setPControllerVisibility('off');
+                app.setControlModeVisibility('off');                
             else
                 % The state has changed to pausing.
                 app.StartSimulationButton.Text = 'Start Simulation';
+                app.setPControllerVisibility('on');
+                app.setControlModeVisibility('on');   
             end
             
             % Spin on this loop, keep requesting to simulate forward the
@@ -92,32 +87,62 @@ classdef UI < matlab.apps.AppBase
         end
 
         % Button pushed function: ResetButton
-        function ResetButtonPushed(app, event)
+       function ResetCartButtonPushed(app, event)
             app.InitialAngledegSlider.Enable='on';
             app.InitialAngledegSliderLabel.Enable='on';
             app.InitialAngledegSlider.Value=0;
             app.StartSimulationButton.Value = 0;
+            app.setControlModeVisibility('on');
             % Manually call the simulation button changed event. [] means
             % an empty event.
             StartSimulationButtonValueChanged(app,[]);
             notify(app,'Reset');
+       end
+       function ResetGainsButtonPushed(app,event)
+           app.KxSpinner.Value = app.default_Kx;
+           app.KthetaSpinner.Value = app.default_Ktheta;
+           app.KvSpinner.Value = app.default_Kv;
+           app.KomegaSpinner.Value = app.default_Komega;
         end
         function InitialAngledegSliderValueChanging(app, event)
             changingValue = event.Value;
             app.InitialAngledegSlider.Value = changingValue;
             notify(app,'ChangeInitialAngle')
-        end
+        end     
+    end
+    
+    methods(Access=private)
+         % A helper function to set the Visibility of P controller
+            % spinners.
+            function setPControllerVisibility(app,on_off_flag)
+                tohide = [app.KvSpinner,app.KvSpinnerLabel,...
+                      app.KomegaSpinner,app.KomegaSpinnerLabel,...
+                      app.KthetaSpinner,app.KthetaSpinnerLabel,...
+                      app.KxSpinner,app.KxSpinnerLabel,app.ResetGainsButton];
+                for h = tohide
+                    h.Enable = on_off_flag;
+                end
+            end
+            function setControlModeVisibility(app,on_off_flag)
+                tohide = [app.FreeFallButton,app.PControllerButton];
+                for h = tohide
+                    h.Enable = on_off_flag;
+                end
+            end
     end
 
     % Component initialization
     methods (Access = private)
      % Create UIFigure and components
         function createComponents(app)
-
+            
             % Create UIFigure and hide until all components are created
             app.UIFigure = uifigure('Visible', 'off');
             app.UIFigure.Position = [100 100 868 512];
             app.UIFigure.Name = 'MATLAB App';
+%              app.UIFigure.KeyPressFcn = createCallbackFcn(app, @UIFigureKeyPress, true);
+%             app.UIFigure.KeyReleaseFcn = createCallbackFcn(app, @UIFigureKeyRelease, true);
+
 
             % Create StartSimulationButton
             app.StartSimulationButton = uibutton(app.UIFigure, 'state');
@@ -126,12 +151,12 @@ classdef UI < matlab.apps.AppBase
             app.StartSimulationButton.FontSize = 16;
             app.StartSimulationButton.Position = [65 92 128 26];
 
-            % Create ResetButton
-            app.ResetButton = uibutton(app.UIFigure, 'push');
-            app.ResetButton.ButtonPushedFcn = createCallbackFcn(app, @ResetButtonPushed, true);
-            app.ResetButton.FontSize = 16;
-            app.ResetButton.Position = [204 92 100 26];
-            app.ResetButton.Text = 'Reset';
+            % Create ResetCartButton
+            app.ResetCartButton = uibutton(app.UIFigure, 'push');
+            app.ResetCartButton.ButtonPushedFcn = createCallbackFcn(app, @ResetCartButtonPushed, true);
+            app.ResetCartButton.FontSize = 16;
+            app.ResetCartButton.Position = [204 92 100 26];
+            app.ResetCartButton.Text = 'Reset Cart';
 
             % Create InitialAngledegSliderLabel
             app.InitialAngledegSliderLabel = uilabel(app.UIFigure);
@@ -161,7 +186,7 @@ classdef UI < matlab.apps.AppBase
             app.KxSpinner.FontSize = 16;
             app.KxSpinner.Enable = 'off';
             app.KxSpinner.Position = [253 347 100 22];
-            app.KxSpinner.Value = 0.572;
+            app.KxSpinner.Value = app.default_Kx;
 
             % Create KvSpinnerLabel
             app.KvSpinnerLabel = uilabel(app.UIFigure);
@@ -177,7 +202,7 @@ classdef UI < matlab.apps.AppBase
             app.KvSpinner.FontSize = 16;
             app.KvSpinner.Enable = 'off';
             app.KvSpinner.Position = [254 276 100 22];
-            app.KvSpinner.Value = 2.12;
+            app.KvSpinner.Value = app.default_Kv;
 
             % Create KomegaSpinnerLabel
             app.KomegaSpinnerLabel = uilabel(app.UIFigure);
@@ -193,15 +218,8 @@ classdef UI < matlab.apps.AppBase
             app.KomegaSpinner.FontSize = 16;
             app.KomegaSpinner.Enable = 'off';
             app.KomegaSpinner.Position = [255 238 100 22];
-            app.KomegaSpinner.Value = 4.02;
-
-            % Create TextArea
-            app.TextArea = uitextarea(app.UIFigure);
-            app.TextArea.FontSize = 16;
-            app.TextArea.BackgroundColor = [0.9412 0.9412 0.9412];
-            app.TextArea.Position = [40 157 284 52];
-            app.TextArea.Value = {'Press Left/Right Arrow Key to Directly Apply Forces on the Cart Body'};
-
+            app.KomegaSpinner.Value = app.default_Komega;
+                      
             % Create ControlModeButtonGroup
             app.ControlModeButtonGroup = uibuttongroup(app.UIFigure);
             app.ControlModeButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @ControlModeButtonGroupSelectionChanged, true);
@@ -209,12 +227,12 @@ classdef UI < matlab.apps.AppBase
             app.ControlModeButtonGroup.FontSize = 16;
             app.ControlModeButtonGroup.Position = [12 265 153 77];
 
-            % Create ArrowKeyOnlyButton
-            app.ArrowKeyOnlyButton = uiradiobutton(app.ControlModeButtonGroup);
-            app.ArrowKeyOnlyButton.Text = 'Arrow Key Only';
-            app.ArrowKeyOnlyButton.FontSize = 16;
-            app.ArrowKeyOnlyButton.Position = [11 27 133 22];
-            app.ArrowKeyOnlyButton.Value = true;
+            % Create FreeFallButton
+            app.FreeFallButton = uiradiobutton(app.ControlModeButtonGroup);
+            app.FreeFallButton.Text = 'Free Fall';
+            app.FreeFallButton.FontSize = 16;
+            app.FreeFallButton.Position = [11 27 133 22];
+            app.FreeFallButton.Value = true;
 
             % Create PControllerButton
             app.PControllerButton = uiradiobutton(app.ControlModeButtonGroup);
@@ -225,10 +243,10 @@ classdef UI < matlab.apps.AppBase
             % Create UIAxes
             app.UIAxes = uiaxes(app.UIFigure);
             title(app.UIAxes, '')
-            xlabel(app.UIAxes, 'X')
-            ylabel(app.UIAxes, 'Y')
+%             xlabel(app.UIAxes, 'X')
+%             ylabel(app.UIAxes, 'Y')
             app.UIAxes.FontSize = 14;
-            app.UIAxes.Position = [409 70 413 374];
+            app.UIAxes.Position = [370 70 413*1.2 374*1.1];
 
             % Create KthetaSpinnerLabel
             app.KthetaSpinnerLabel = uilabel(app.UIFigure);
@@ -244,7 +262,16 @@ classdef UI < matlab.apps.AppBase
             app.KthetaSpinner.FontSize = 16;
             app.KthetaSpinner.Enable = 'off';
             app.KthetaSpinner.Position = [254 311 100 22];
-            app.KthetaSpinner.Value = 15.7;
+            app.KthetaSpinner.Value = app.default_Ktheta;
+            
+            
+            % Create ResetGainsButton
+            app.ResetGainsButton = uibutton(app.UIFigure, 'push');
+            app.ResetGainsButton.Enable = 'off';
+            app.ResetGainsButton.Position = [255 199 100 22];
+            app.ResetGainsButton.Text = 'Reset Gains';
+            app.ResetGainsButton.ButtonPushedFcn = createCallbackFcn(app, @ResetGainsButtonPushed, true);
+            
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
@@ -257,8 +284,12 @@ classdef UI < matlab.apps.AppBase
         % Construct app
         function app = UI()
             % Initialize default control input u.
-            app.u = 0;
-            app.frame_rate= 20;% Update the animation at 30 fps
+            app.frame_rate= 15;% Update the animation at frame_rate fps
+            
+            app.default_Kx=0.572;
+            app.default_Ktheta = 15.7;
+            app.default_Kv = 2.12;
+            app.default_Komega = 4.02;
             
             % Create UIFigure and components
             createComponents(app)
@@ -284,13 +315,13 @@ classdef UI < matlab.apps.AppBase
         function u=getInput(app,s)
             selectedButton = app.ControlModeButtonGroup.SelectedObject;
             
-            if selectedButton.Text == "Arrow Key Only"
-                u=app.u;
+            if selectedButton.Text == "Free Fall"
+                u=0;
             else
                 % Recall state vector s=(x,theta, dx/dt,dtheta/dt)
 
                 K=[app.KxSpinner.Value,app.KthetaSpinner.Value,app.KvSpinner.Value,app.KomegaSpinner.Value];
-                u=app.u + K*s;
+                u= K*s;
             end
         end
     end

@@ -6,7 +6,7 @@ model = defaultModel();
 app = UI();
 
 % Create UI listeners
-simulate_duration_dt = 0.05;
+simulate_duration_dt = 0.08;
 addlistener(app,'RequestSimulate',@(app,event) UIRequestCallback(app,event,model,simulate_duration_dt));
 addlistener(app,'Reset',@(app,event) ResetCallback(app,event,model));
 addlistener(app,'ChangeInitialAngle',@(app,event) InitialAngleCallback(app,event,model));
