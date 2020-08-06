@@ -1,7 +1,6 @@
 % Create cart inverted pendulum simulator
 model = defaultModel();
 
-
 % Create the UI instance. The UI window will pop up automatically.
 app = UI();
 
@@ -38,7 +37,6 @@ end
 
 
 function SimulationDoneCallback(app,model,event)
-%     disp('Simulation Done received');
     app.updateAxes(model);
 end
 

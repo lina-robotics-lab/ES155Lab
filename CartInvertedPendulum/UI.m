@@ -20,6 +20,9 @@ classdef UI < matlab.apps.AppBase
         KthetaSpinnerLabel          matlab.ui.control.Label
         KthetaSpinner               matlab.ui.control.Spinner
         ResetGainsButton            matlab.ui.control.Button
+        ConfirmButton                matlab.ui.control.Button
+        TypeinInitialAngleEditFieldLabel  matlab.ui.control.Label
+        TypeinInitialAngleEditField  matlab.ui.control.NumericEditField
         frame_rate
         default_Kx
         default_Ktheta
@@ -87,6 +90,7 @@ classdef UI < matlab.apps.AppBase
             app.InitialAngledegSliderLabel.Enable='on';
             app.InitialAngledegSlider.Value=0;
             app.StartSimulationButton.Value = 0;
+            app.TypeinInitialAngleEditField.Value = 0;
             app.setControlModeVisibility('on');
             % Manually call the simulation button changed event. [] means
             % an empty event.
@@ -102,8 +106,16 @@ classdef UI < matlab.apps.AppBase
         function InitialAngledegSliderValueChanging(app, event)
             changingValue = event.Value;
             app.InitialAngledegSlider.Value = changingValue;
-            notify(app,'ChangeInitialAngle')
+            app.TypeinInitialAngleEditField.Value=changingValue;
+            
+            notify(app,'ChangeInitialAngle');
         end     
+        
+         % Button pushed function: ConfirmButton
+        function ConfirmButtonPushed(app, event)
+            app.InitialAngledegSlider.Value=app.TypeinInitialAngleEditField.Value;
+            notify(app,'ChangeInitialAngle');
+        end
     end
     
     methods(Access=private)
@@ -150,12 +162,12 @@ classdef UI < matlab.apps.AppBase
             app.ResetCartButton.FontSize = 16;
             app.ResetCartButton.Position = [204 92 100 26];
             app.ResetCartButton.Text = 'Reset Cart';
-
+   
             % Create InitialAngledegSliderLabel
             app.InitialAngledegSliderLabel = uilabel(app.UIFigure);
             app.InitialAngledegSliderLabel.HorizontalAlignment = 'right';
             app.InitialAngledegSliderLabel.FontSize = 14;
-            app.InitialAngledegSliderLabel.Position = [28 422 111 22];
+            app.InitialAngledegSliderLabel.Position = [23 449 111 22];
             app.InitialAngledegSliderLabel.Text = 'Initial Angle(deg)';
 
             % Create InitialAngledegSlider
@@ -163,7 +175,7 @@ classdef UI < matlab.apps.AppBase
             app.InitialAngledegSlider.Limits = [-180 180];
             app.InitialAngledegSlider.ValueChangingFcn = createCallbackFcn(app, @InitialAngledegSliderValueChanging, true);
             app.InitialAngledegSlider.FontSize = 14;
-            app.InitialAngledegSlider.Position = [154 432 177 3];
+            app.InitialAngledegSlider.Position = [149 459 177 3];
 
             % Create KxSpinnerLabel
             app.KxSpinnerLabel = uilabel(app.UIFigure);
@@ -262,7 +274,25 @@ classdef UI < matlab.apps.AppBase
             app.ResetGainsButton.Position = [255 199 100 22];
             app.ResetGainsButton.Text = 'Reset Gains';
             app.ResetGainsButton.ButtonPushedFcn = createCallbackFcn(app, @ResetGainsButtonPushed, true);
-            
+          
+            % Create ConfirmButton
+            app.ConfirmButton = uibutton(app.UIFigure, 'push');
+            app.ConfirmButton.ButtonPushedFcn = createCallbackFcn(app, @ConfirmButtonPushed, true);
+            app.ConfirmButton.Position = [252 392 100 22];
+            app.ConfirmButton.Text = 'Confirm';
+
+            % Create TypeinInitialAngleEditFieldLabel
+            app.TypeinInitialAngleEditFieldLabel = uilabel(app.UIFigure);
+            app.TypeinInitialAngleEditFieldLabel.HorizontalAlignment = 'right';
+            app.TypeinInitialAngleEditFieldLabel.Position = [10 392 110 22];
+            app.TypeinInitialAngleEditFieldLabel.Text = 'Type in Initial Angle';
+
+            % Create TypeinInitialAngleEditField
+            app.TypeinInitialAngleEditField = uieditfield(app.UIFigure, 'numeric');
+            app.TypeinInitialAngleEditField.Limits = [-180 180];
+            app.TypeinInitialAngleEditField.HorizontalAlignment = 'left';
+            app.TypeinInitialAngleEditField.Position = [135 392 100 22];
+
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
