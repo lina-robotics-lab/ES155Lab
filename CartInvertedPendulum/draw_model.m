@@ -5,7 +5,7 @@ function ax=draw_model(ax,model)
         canvas_size_ratio = 1.5;
         aspect_ratio = 1;
         xl = [-1,1]* canvas_size_ratio * model.l * aspect_ratio;
-        yl = [-0.2,1]*canvas_size_ratio * model.l;
+        yl = [-0.5,1]*canvas_size_ratio * model.l;
 
         width = 0.3;
         height = 0.15;
@@ -28,8 +28,6 @@ function ax=draw_model(ax,model)
         plot(ax,pgon,'FaceColor','b','EdgeColor','None');
         
         hold(ax,'on');
-        
-
 
         % Draw Vertical Basis Line
         plot(ax,model.s(1)*[1 1],[0,yl(2)],'LineStyle','--','Color',[0.3,0.3,0.3]);
@@ -76,7 +74,7 @@ function ax=draw_model(ax,model)
          
         axis(ax,[xl yl])
        
-% A helper function
+% A helper function to do a 2D rotation transformation.
     function [x_rot,y_rot]=rotPoints(origin,theta,x,y)
         x_diff = x-origin(1);
         y_diff = y-origin(2);

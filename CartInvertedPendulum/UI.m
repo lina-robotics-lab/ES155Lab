@@ -15,7 +15,7 @@ classdef UI < matlab.apps.AppBase
         KomegaSpinner               matlab.ui.control.Spinner
         ControlModeButtonGroup      matlab.ui.container.ButtonGroup
         FreeFallButton          matlab.ui.control.RadioButton
-        PControllerButton           matlab.ui.control.RadioButton
+        PDControllerButton           matlab.ui.control.RadioButton
         UIAxes                      matlab.ui.control.UIAxes
         KthetaSpinnerLabel          matlab.ui.control.Label
         KthetaSpinner               matlab.ui.control.Spinner
@@ -43,35 +43,32 @@ classdef UI < matlab.apps.AppBase
         % Code that executes after component creation
         function startupFcn(app)
           
-        end
+        end 
         
-        
-
         % Selection changed function: ControlModeButtonGroup
         function ControlModeButtonGroupSelectionChanged(app, event)
             selectedButton = app.ControlModeButtonGroup.SelectedObject;
             
             if selectedButton.Text == "Free Fall"
-                setPControllerVisibility(app,"off");
+                setPDControllerVisibility(app,"off");
             else
-                setPControllerVisibility(app,"on");
+                setPDControllerVisibility(app,"on");
             end
         end
 
         % Value changed function: StartSimulationButton
         function StartSimulationButtonValueChanged(app, event)
-            value = app.StartSimulationButton.Value;
             if app.StartSimulationButton.Value==1
                % The state has changed to running simulation.
                 app.InitialAngledegSlider.Enable='off';
                 app.InitialAngledegSliderLabel.Enable='off';
                 app.StartSimulationButton.Text = 'Press to Pause';
-                app.setPControllerVisibility('off');
+                app.setPDControllerVisibility('off');
                 app.setControlModeVisibility('off');                
             else
                 % The state has changed to pausing.
                 app.StartSimulationButton.Text = 'Start Simulation';
-                app.setPControllerVisibility('on');
+                app.setPDControllerVisibility('on');
                 app.setControlModeVisibility('on');   
             end
             
@@ -80,9 +77,7 @@ classdef UI < matlab.apps.AppBase
             while isprop(app,'StartSimulationButton')==1 && app.StartSimulationButton.Value==1
                 notify(app,'RequestSimulate');
                 pause(1/app.frame_rate);
-%                 pause(0.05);
-%                 disp(rand());
-            end
+           end
            
         end
 
@@ -114,7 +109,7 @@ classdef UI < matlab.apps.AppBase
     methods(Access=private)
          % A helper function to set the Visibility of P controller
             % spinners.
-            function setPControllerVisibility(app,on_off_flag)
+            function setPDControllerVisibility(app,on_off_flag)
                 tohide = [app.KvSpinner,app.KvSpinnerLabel,...
                       app.KomegaSpinner,app.KomegaSpinnerLabel,...
                       app.KthetaSpinner,app.KthetaSpinnerLabel,...
@@ -124,7 +119,7 @@ classdef UI < matlab.apps.AppBase
                 end
             end
             function setControlModeVisibility(app,on_off_flag)
-                tohide = [app.FreeFallButton,app.PControllerButton];
+                tohide = [app.FreeFallButton,app.PDControllerButton];
                 for h = tohide
                     h.Enable = on_off_flag;
                 end
@@ -140,8 +135,6 @@ classdef UI < matlab.apps.AppBase
             app.UIFigure = uifigure('Visible', 'off');
             app.UIFigure.Position = [100 100 868 512];
             app.UIFigure.Name = 'MATLAB App';
-%              app.UIFigure.KeyPressFcn = createCallbackFcn(app, @UIFigureKeyPress, true);
-%             app.UIFigure.KeyReleaseFcn = createCallbackFcn(app, @UIFigureKeyRelease, true);
 
 
             % Create StartSimulationButton
@@ -225,7 +218,7 @@ classdef UI < matlab.apps.AppBase
             app.ControlModeButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @ControlModeButtonGroupSelectionChanged, true);
             app.ControlModeButtonGroup.Title = 'Control Mode';
             app.ControlModeButtonGroup.FontSize = 16;
-            app.ControlModeButtonGroup.Position = [12 265 153 77];
+            app.ControlModeButtonGroup.Position = [12 265 159 77];
 
             % Create FreeFallButton
             app.FreeFallButton = uiradiobutton(app.ControlModeButtonGroup);
@@ -234,17 +227,15 @@ classdef UI < matlab.apps.AppBase
             app.FreeFallButton.Position = [11 27 133 22];
             app.FreeFallButton.Value = true;
 
-            % Create PControllerButton
-            app.PControllerButton = uiradiobutton(app.ControlModeButtonGroup);
-            app.PControllerButton.Text = 'P Controller';
-            app.PControllerButton.FontSize = 16;
-            app.PControllerButton.Position = [11 6 106 22];
+            % Create PDControllerButton
+            app.PDControllerButton = uiradiobutton(app.ControlModeButtonGroup);
+            app.PDControllerButton.Text = 'PD Controller';
+            app.PDControllerButton.FontSize = 16;
+            app.PDControllerButton.Position = [11 6 120 22];
 
             % Create UIAxes
             app.UIAxes = uiaxes(app.UIFigure);
             title(app.UIAxes, '')
-%             xlabel(app.UIAxes, 'X')
-%             ylabel(app.UIAxes, 'Y')
             app.UIAxes.FontSize = 14;
             app.UIAxes.Position = [370 70 413*1.2 374*1.1];
 
