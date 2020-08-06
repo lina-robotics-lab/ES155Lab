@@ -5,7 +5,7 @@ function ax=draw_model(ax,model)
         canvas_size_ratio = 1.5;
         aspect_ratio = 1;
         xl = [-1,1]* canvas_size_ratio * model.l * aspect_ratio;
-        yl = [-0.5,1]*canvas_size_ratio * model.l;
+        yl = [-0.2,1]*canvas_size_ratio * model.l;
 
         width = 0.3;
         height = 0.15;

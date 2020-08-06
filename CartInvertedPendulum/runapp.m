@@ -10,6 +10,7 @@ simulate_duration_dt = 0.08;
 addlistener(app,'RequestSimulate',@(app,event) UIRequestCallback(app,event,model,simulate_duration_dt));
 addlistener(app,'Reset',@(app,event) ResetCallback(app,event,model));
 addlistener(app,'ChangeInitialAngle',@(app,event) InitialAngleCallback(app,event,model));
+addlistener(app,'ObjectBeingDestroyed',@AppClosedCallback);
 
 % Create simulation model listeners
 addlistener(model,'simulationDone',@(model,event) SimulationDoneCallback(app,model,event));
@@ -17,7 +18,7 @@ addlistener(model,'simulationDone',@(model,event) SimulationDoneCallback(app,mod
 app.updateAxes(model);
 
 function model = defaultModel()
-    % Parameters to specify the model dynamics.
+% Parameters to specify the model dynamics.
     g=9.81;
     mp=.23;
     l=.6413;
@@ -30,6 +31,7 @@ function model = defaultModel()
 
     % Initial state.
     % Recall state vector s=(x,theta, dx/dt,dtheta/dt)
+
     s0 = [0;0;0;0];
 
     % Create cart inverted pendulum simulator
@@ -49,6 +51,7 @@ function UIRequestCallback(app,event,model,dt)
         notify(model,'requestSimulate',SimulateInputData(app.getInput(model.s),dt));
     else
         % If currently it is pausing, do nothing
+%         disp('nothing to be done');
     end
 end
 
@@ -66,4 +69,9 @@ function InitialAngleCallback(app,event,model)
     model.s0=[0;theta;0;0];
     model.s = model.s0;
     app.updateAxes(model);
+end
+
+function AppClosedCallback(app,event)
+    global appClosed;
+    appClosed=true;
 end
