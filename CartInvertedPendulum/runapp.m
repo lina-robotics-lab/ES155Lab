@@ -28,8 +28,8 @@ function model = defaultModel()
     process_noise_mag=1;
 
     % Initial state.
-    % Recall state vector s=(x,theta, dx/dt,dtheta/dt)
-    s0 = [0;0;0;0];
+    % Recall state vector s=(x,theta,I_x,I_theta, dx/dt,dtheta/dt)
+    s0 = [0;0;0;0;0;0];
 
     % Create cart inverted pendulum simulator
     model = cart_inverted_model(s0,g,mp,l,r,J,gamma,mc,c,process_noise_mag);
@@ -61,7 +61,7 @@ function ResetCallback(app,event,model)
 end
 function InitialAngleCallback(app,event,model)
     theta = app.InitialAngledegSlider.Value/360 * 2 * pi;
-    model.s0=[0;theta;0;0];
+    model.s0=[0;theta;0;0;0;0];
     model.s = model.s0;
     app.updateAxes(model);
 end

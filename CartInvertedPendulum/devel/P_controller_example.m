@@ -15,12 +15,12 @@ c=0.9;
 noise_mag=1;
 
 % Initial state.
-% Recall state vector s=(x,theta, dx/dt,dtheta/dt)
+% Recall state vector s=(x,theta,I_x,I_theta, dx/dt,dtheta/dt)
 
-s0 = [0;pi/8;0;0];
+s0 = [0;pi/8;0;0;0;0];
 
 % Create cart inverted pendulum simulator
-model = cart_inverted_model(s0,g,mp,l,r,J,gamma,mc,c);
+model = cart_inverted_model(s0,g,mp,l,r,J,gamma,mc,c,noise_mag);
 
 % Specify the time of simulation.
 t0 = 0;
@@ -37,9 +37,9 @@ xl = [-1,1]* canvas_size_ratio * model.l * aspect_ratio;
 
 %%
 % The following is a stablizing controller.
-% Recall state vector s=(x,theta, dx/dt,dtheta/dt)
+% Recall state vector s=(x,theta,I_x,I_theta, dx/dt,dtheta/dt)
 
-K= [0.572 +15.7 2.12 +4.02];
+K= [0.5 16 0.1 0.0 2 4];
 
 %%
 % Start simulation
@@ -53,12 +53,10 @@ for i =1:floor((t_end-t0)/dt)
     % Closing the loop of feedback here.
     u = K*model.s;
     
-    % Add some noise to create the difficulty in control.
-    noise = (rand()-0.5)*noise_mag;
     
     % Simulate for dt time duration, with input u+noise acting on the
     % system.
-    model.simulate(u+noise,dt);
+    model.simulate(u,dt);
     
         
     % If the cart goes out of pre-defined boundary, stop simulation.

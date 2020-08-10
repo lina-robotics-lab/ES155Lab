@@ -13,8 +13,8 @@ classdef cart_inverted_model<handle
         M=0;
         R=0;
         K=0;
-        s0 = [0;0;0;0];
-        s = [0;0;0;0];
+        s0 = [0;0;0;0;0;0];
+        s = [0;0;0;0;0;0];
         process_noise_mag=1;
    end
    % Events detectable by the outside world.
@@ -70,23 +70,26 @@ classdef cart_inverted_model<handle
         % The local helper function
         function xdot=stateTransFunc(t,s,u,params)
             [g, M, R, K, c, gamma] = params{:} ;
-            % State vector s=(x,theta, dx/dt,dtheta/dt)
+            % State vector s=(x,theta, I_x,I_theta,dx/dt,dtheta/dt) => PID
             F = u;
             
-            v = s(3);
+            v = s(5);
             theta = s(2);
-            omega = s(4);
+            omega = s(6);
 
-            xdot = [0; 0; 0; 0];
-            xdot(1)=s(3);
-            xdot(2)=s(4);
+            xdot = [0; 0; 0; 0 ; 0 ; 0];
+            
+            xdot(1)=v;
+            xdot(2)=omega;
+            xdot(3)=s(1); % I_x
+            xdot(4)=s(2); % I_theta
 
-            xdot(4) = M*gamma*omega - M*g*R*sin(theta) + (F-c*v+R*sin(theta)*omega^2)*R*cos(theta);
-            xdot(4) = xdot(4)/(R^2*cos(theta)^2-M*K);
+            xdot(6) = M*gamma*omega - M*g*R*sin(theta) + (F-c*v+R*sin(theta)*omega^2)*R*cos(theta);
+            xdot(6) = xdot(6)/(R^2*cos(theta)^2-M*K);
 
         %     xdot(3) = (R*g*sin(theta)-gamma*omega-K*xdot(4))/(R*cos(theta)) ;
-            xdot(3) = R^2*g*sin(theta)*cos(theta)-K*(F-c*v+R*sin(theta)*omega^2)-gamma*R*omega*cos(theta);
-            xdot(3) = xdot(3)/(R^2*cos(theta)^2-M*K);
+            xdot(5) = R^2*g*sin(theta)*cos(theta)-K*(F-c*v+R*sin(theta)*omega^2)-gamma*R*omega*cos(theta);
+            xdot(5) = xdot(5)/(R^2*cos(theta)^2-M*K);
         end
       end
    end
