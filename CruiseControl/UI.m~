@@ -102,7 +102,6 @@ classdef UI < matlab.apps.AppBase
         % Button pushed function: ResetButton
        function ResetCartButtonPushed(app, event)
             app.setTargetPositionVisibility('on');
-            app.setHillAngleVisibility("on");
             app.StartSimulationButton.Value = 0;
             app.setControlModeVisibility('on');
             % Manually call the simulation button changed event. [] means
@@ -181,7 +180,7 @@ classdef UI < matlab.apps.AppBase
              function setHillAngleVisibility(app,on_off_flag)
                 tohide = [app.HillAngledegSlider,app.HillAngledegSliderLabel,...
                         app.TypeinHillAngleEditField,app.TypeinHillAngleEditFieldLabel,...
-                        app.ConfirmButton_2];
+                        app.ConfirmButton];
                  for h = tohide
                     h.Enable = on_off_flag;
                 end    
@@ -222,7 +221,7 @@ classdef UI < matlab.apps.AppBase
 
             % Create TargetPositionSlider
             app.TargetPositionSlider = uislider(app.UIFigure);
-            app.TargetPositionSlider.Limits = [-5 5];
+            app.TargetPositionSlider.Limits = [-15 15];
             app.TargetPositionSlider.ValueChangingFcn = createCallbackFcn(app, @TargetPositionSliderValueChanging, true);
             app.TargetPositionSlider.FontSize = 14;
             app.TargetPositionSlider.Position = [149 459 177 3];
@@ -307,7 +306,7 @@ classdef UI < matlab.apps.AppBase
             app.UIAxes = uiaxes(app.UIFigure);
             title(app.UIAxes, '')
             app.UIAxes.FontSize = 14;
-            app.UIAxes.Position = [450 0 350 350];
+            app.UIAxes.Position = [370 0 350 350];
 %             app.UIAxes.Visible = 'off';
 %            
             
@@ -339,7 +338,7 @@ classdef UI < matlab.apps.AppBase
 
             % Create TypeinTargetPositionEditField
             app.TypeinTargetPositionEditField = uieditfield(app.UIFigure, 'numeric');
-            app.TypeinTargetPositionEditField.Limits = [-5 5];
+            app.TypeinTargetPositionEditField.Limits = [-15 15];
             app.TypeinTargetPositionEditField.HorizontalAlignment = 'left';
             app.TypeinTargetPositionEditField.Position = [135 392 100 22];
             
@@ -369,7 +368,10 @@ classdef UI < matlab.apps.AppBase
             app.KIxSpinner.FontSize = 16;
             app.KIxSpinner.Enable = 'off';
             app.KIxSpinner.Position = [253 250 100 22];
-       
+
+           
+
+
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
         end

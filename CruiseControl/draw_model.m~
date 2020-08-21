@@ -3,14 +3,14 @@
 function ax=draw_model(ax,model,target_pos)
         cla(ax);
         
-        width = 1.8;
-        height = 1.2;
+        width = 2.5;
+        height = 1.6;
         x = model.s(1)-1/2*width;
         y=0-height;
      
        
-        xl = [-5,5];
-        yl = [-4,6];
+        xl = [-15,15];
+        yl = [-4,26];
        
         % Draw Target Position indicator
         plot(ax,target_pos*[1,1],yl,'LineStyle','--','Color','blue','DisplayName','Target Position');
@@ -61,7 +61,7 @@ function ax=draw_model(ax,model,target_pos)
         
         hold(ax,'on');
         
-        set(ax,'ytick',[],'YColor','None','xtick',-5:5);
+        set(ax,'ytick',[],'YColor','None');
         
         hold(ax,'on');
         

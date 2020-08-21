@@ -7,13 +7,15 @@ classdef cruise_control_model<handle
         m;      % Mass of the car
         delta;       % Viscocity coefficient
                          
-        Fhill;       % The gravita
+        Fhill;       % The gravitational force.
 
         V0;       % initial velocity m/s
         
         s0; % initial state [y0 ; v0 ;int_y0]
         
         s; % System state [y;v;int_y]
+        
+        target_y; % Reference State to reach.
         
         process_noise_mag;
    end
@@ -23,7 +25,7 @@ classdef cruise_control_model<handle
        simulationDone
    end
    methods(Access=public)
-      function obj = cruise_control_model(m,delta,Fhill,s0,process_noise_mag)
+      function obj = cruise_control_model(m,delta,Fhill,s0,target_y,process_noise_mag)
          obj.m = m;
          
          obj.delta = delta;
@@ -33,6 +35,8 @@ classdef cruise_control_model<handle
          obj.s0 = s0; % [y,v,int_y]
          
          obj.s = obj.s0; %[y,v,int_y]
+         
+         obj.target_y = target_y;
          
          obj.process_noise_mag = process_noise_mag;
          
@@ -60,10 +64,12 @@ classdef cruise_control_model<handle
         % time domain ODE simulaiton
         % Adding process noise
         u = u + (rand()-0.5)*obj.process_noise_mag;
-        [t,new_s] = ode45(@(t,s) stateTransFunc(t,s,u,params),Tspan,curr_s);        
+        
+        [t,new_s_offset] = ode45(@(t,s) stateTransFunc(t,s,u,params),Tspan,curr_s-[obj.target_y;0;0]);        
         
         % Update the object state.
-        obj.s(:) = new_s(end,:);
+               
+        obj.s(:) = new_s_offset(end,:)'+[obj.target_y;0;0];
 
         
         % The local helper function
@@ -78,7 +84,7 @@ classdef cruise_control_model<handle
                 % By default, control input is zero.
                 Fengine = u;
                 
-                sdot = zeros(2,1);
+                sdot = zeros(3,1);
                 % dynamcis
                 sdot(1) = s(2);                              % position part
                 sdot(2) = (-delta*s(2) + Fhill + Fengine)/m; % velocity part

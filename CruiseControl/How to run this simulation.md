@@ -6,14 +6,18 @@ Change folder to the root directory of runapp.m
 
 Run runapp.m
 
-You may change the initial angle of the pendulum by dragging the slider bar at the top, or type in the initial value in the box beneath the slider and press "Confirm".
+Initially, the cart situates at position=0.
+
+You may change the slope of the ground by dragging the slider bar at the top, or type in the initial value in the box beneath the slider and press "Confirm". The change in the slope of the ground will be reflected in the animation of the cart.
+
+ You may change the target position to reach similarly through the corresponding slider or the value box beneath. The change in target position will be reflected through the change of the blue dotted vertical line in the animation.
 
 Click "Start Simulation" button to start the simulation. The button will be pressed down
 and its text changes to "Press to Pause".  Press the same button again to pause the simulation.
 
 Click "Reset Cart" to stop the simulation and reset the cart to the default state.
 
-By default, the proportional controller is disabled, the system is in "Free Fall" mode. 
+By default, the proportional controller is disabled, the system is in "No Control" mode. 
 
 Select the radio button "PD Controller" in the "Control Mode" block to enable proportional controller.
 

@@ -8,7 +8,8 @@ app = UI();
 simulate_duration_dt = 0.08;
 addlistener(app,'RequestSimulate',@(app,event) UIRequestCallback(app,event,model,simulate_duration_dt));
 addlistener(app,'Reset',@(app,event) ResetCallback(app,event,model));
-addlistener(app,'ChangeInitialAngle',@(app,event) InitialAngleCallback(app,event,model));
+addlistener(app,'ChangeTargetPosition',@(app,event) TargetPositionCallback(app,event,model));
+addlistener(app,'ChangeHillAngle',@(app,event) HillAngleCallback(app,event,model));
 
 % Create simulation model listeners
 addlistener(model,'simulationDone',@(model,event) SimulationDoneCallback(app,model,event));
@@ -16,23 +17,25 @@ addlistener(model,'simulationDone',@(model,event) SimulationDoneCallback(app,mod
 app.updateAxes(model);
 
 function model = defaultModel()
-% Parameters to specify the model dynamics.
-    g=9.81;
-    mp=.23;
-    l=.6413;
-    r=l/2;
-    J=1/3*mp*l^2;
-    gamma=.0024;
-    mc=.38;
-    c=0.9;
-    process_noise_mag=0;
+    % Parameters to specify the model dynamics.
+    m     = 10;      % mass
+    delta = 0;       % Viscocity coefficient, for simplicity, 
+                     % assumed to be zero;
+    Fhill = 0;       % Assume the vehicle runs on a flat road; 
 
-    % Initial state.
-    % Recall state vector s=(x,theta,I_x,I_theta, dx/dt,dtheta/dt)
-    s0 = [0;0;0;0;0;0];
+    V0    = 0;       % initial velocity m/s
+    y0  = 0;     % initial location m
 
-    % Create cart inverted pendulum simulator
-    model = cart_inverted_model(s0,g,mp,l,r,J,gamma,mc,c,process_noise_mag);
+    s0 = [y0;V0;0]; % System State: s = [y;v;int_y]
+    target_y = 0; % Default Target State
+
+    
+    % Magnitude of the process noise to be added to the input
+    noise_mag=0;
+
+    % Create the model for cruise control dynamics
+    model = cruise_control_model(m,delta,Fhill,s0,target_y,noise_mag);
+
 end
 
 
@@ -59,9 +62,16 @@ function ResetCallback(app,event,model)
     model.s=default_model.s;
     app.updateAxes(model);
 end
-function InitialAngleCallback(app,event,model)
-    theta = app.InitialAngledegSlider.Value/360 * 2 * pi;
-    model.s0=[0;theta;0;0;0;0];
+function TargetPositionCallback(app,event,model)
+    
+    model.target_y = app.TargetPositionSlider.Value;
+    model.s0=[0;0;0]; % System State: s = [y;v;int_y]
     model.s = model.s0;
     app.updateAxes(model);
+end
+function HillAngleCallback(app,event,model)
+    g = 9.842;
+    theta = app.HillAngledegSlider.Value;
+    model.Fhill = g * model.m * sin(theta/180*pi);
+    view(app.UIAxes,[theta,90]);
 end

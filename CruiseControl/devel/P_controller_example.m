@@ -14,25 +14,26 @@ s0 = [y0;V0;0]; % System State: s = [y;v;int_y]
 
 y_target = 5; % Target position to reach
 v_target = 0; % Target velocity, which should be 0.
+target_s = [y_target;v_target;0];
 
 % Magnitude of the process noise to be added to the input
 noise_mag=0;
 
-% Create cart inverted pendulum simulator
-model = cruise_control_model(m,delta,Fhill,s0,noise_mag);
+% Create the model for cruise control dynamics
+model = cruise_control_model(m,delta,Fhill,s0,y_target,noise_mag);
 
 % Specify the time of simulation.
 t0 = 0;
 t = t0;
 dt = 0.03;
-t_end = 3;
+t_end = 10;
 % 
 % % Specify some animation related parameters.
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0.04, 1, 0.96]*1);
  
 %% The following is a working PID controller.
 
-K= -[100 50 0];
+K= -[50 50 0];
 % 
 % %%
 % Start simulation
