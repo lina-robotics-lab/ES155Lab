@@ -26,8 +26,7 @@ function model = defaultModel()
     mc=.38;
     c=0.9;
     
-    % Change the process noise magnitude if you want some disturbance in
-    % the system.
+    % Change the process noise magnitude if you want some disturbance 
     process_noise_mag=0;
 
     % Initial state.
