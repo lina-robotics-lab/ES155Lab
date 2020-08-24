@@ -18,6 +18,12 @@ classdef cruise_control_model<handle
         target_y; % Reference State to reach.
         
         process_noise_mag;
+        
+        % Historical data containers.
+        state_history = [];
+        time_stamps = [];
+        sim_time = 0;
+
    end
    % Events detectable by the outside world.
    events
@@ -41,11 +47,28 @@ classdef cruise_control_model<handle
          obj.process_noise_mag = process_noise_mag;
          
          addlistener(obj,'requestSimulate',@(obj,event) requestSimulateCallback(obj,event));
+         
+         
+           
+         % Initialize the state history container.
+         obj.resetStateHistory();
       end
       
       function requestSimulateCallback(obj,event)
           obj.simulate(event.u,event.dt);
           notify(obj,'simulationDone');
+      end
+        function history=getStateHistory(obj)
+          history.y = obj.state_history(1,:);
+           history.v = obj.state_history(2,:);
+          history.Iy = obj.state_history(3,:);
+          history.time = obj.time_stamps;
+          history.target_y = obj.target_y;
+      end
+       function obj=resetStateHistory(obj)
+          obj.state_history = [obj.s0];
+          obj.sim_time = 0;
+          obj.time_stamps = [obj.sim_time];
       end
       function obj=simulate(obj,u,time_duration)
           % Simulate the system under the influence of input u for
@@ -67,11 +90,14 @@ classdef cruise_control_model<handle
         
         [t,new_s_offset] = ode45(@(t,s) stateTransFunc(t,s,u,params),Tspan,curr_s-[obj.target_y;0;0]);        
         
-        % Update the object state.
-               
+         % Update the object state.
+        obj.sim_time = obj.sim_time+time_duration;
         obj.s(:) = new_s_offset(end,:)'+[obj.target_y;0;0];
 
-        
+        % Record the state after the simulation step.
+        obj.state_history = [obj.state_history,obj.s];
+        obj.time_stamps = [obj.time_stamps,obj.sim_time];
+      
         % The local helper function
         function sdot=stateTransFunc(t,s,u,params)
             % Vehicle dynamcis 

@@ -61,6 +61,17 @@ function ResetCallback(app,event,model)
     model.s0=default_model.s0;
     model.s=default_model.s;
     app.updateAxes(model);
+  
+    % Save Data
+    history = model.getStateHistory();
+    save("sim-data-"+datestr(now,'mmdd-HHMMSS')+".mat",'history');
+    
+    % Reset model history
+    model.resetStateHistory();
+    
+    % Plot history
+    plot_history(history);
+    
 end
 function TargetPositionCallback(app,event,model)
     
@@ -68,6 +79,7 @@ function TargetPositionCallback(app,event,model)
     model.s0=[0;0;0]; % System State: s = [y;v;int_y]
     model.s = model.s0;
     app.updateAxes(model);
+    
 end
 function HillAngleCallback(app,event,model)
     g = 9.842;
