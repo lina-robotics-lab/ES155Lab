@@ -15,7 +15,7 @@ You may change the slope of the ground by dragging the slider bar at the top, or
 Click "Start Simulation" button to start the simulation. The button will be pressed down
 and its text changes to "Press to Pause".  Press the same button again to pause the simulation.
 
-Click "Reset Cart" to stop the simulation and reset the cart to the default state.
+Click "Stop & Save Data" to stop the simulation and reset the cart to the default state. The plot of the history data for the simulation will be displayed, and the corresponding data is saved in 'sim-data-xxx.mat'.
 
 By default, the proportional controller is disabled, the system is in "No Control" mode. 
 
