@@ -64,7 +64,10 @@ function ResetCallback(app,event,model)
     
     % Save Data
     history = model.getStateHistory();
-    save("sim-data-"+datestr(now,'yyyy-mmm-dd-HH:MM:SS')+".mat",'history');
+    save("sim-data-"+datestr(now,'mmdd-HHMMSS')+".mat",'history');
+    
+    % Plot history
+    plot_history(history);
 end
 function InitialAngleCallback(app,event,model)
     theta = app.InitialAngledegSlider.Value/360 * 2 * pi;
