@@ -65,7 +65,6 @@ classdef cart_inverted_model<handle
           history.v = obj.state_history(5,:);
           history.omega = obj.state_history(6,:);
           history.time = obj.time_stamps;
-          
       end
       function obj=resetStateHistory(obj)
           obj.state_history = [obj.s0];
