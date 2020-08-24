@@ -48,9 +48,6 @@ classdef cart_inverted_model<handle
           
         
            addlistener(obj,'requestSimulate',@(obj,event) requestSimulateCallback(obj,event));
-           
-           % Initialize the state history container.
-           obj.resetStateHistory();
       end
       
       function requestSimulateCallback(obj,event)
@@ -90,7 +87,7 @@ classdef cart_inverted_model<handle
         obj.sim_time = obj.sim_time+time_duration;
         obj.s(:) = new_s(end,:);
         
-        % Record the state after the simulation step.
+        % Record the state after the simulation step is done.
         obj.state_history = [obj.state_history,obj.s];
         obj.time_stamps = [obj.time_stamps,obj.sim_time];
        

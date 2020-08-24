@@ -87,6 +87,7 @@ classdef UI < matlab.apps.AppBase
                 app.setIControllerVisibility('off');
                 app.setControlModeVisibility('off');    
                 app.setInitialAngleVisibility('off');
+                app.ResetCartButton.Enable = 'on';
             else
                 % The state has changed to pausing.
                 app.StartSimulationButton.Text = 'Start Simulation';
@@ -112,6 +113,7 @@ classdef UI < matlab.apps.AppBase
             % Manually call the simulation button changed event. [] means
             % an empty event.
             StartSimulationButtonValueChanged(app,[]);
+            app.ResetCartButton.Enable = 'off';
             notify(app,'Reset');
        end
        function ResetGainsButtonPushed(app,event)
@@ -196,8 +198,9 @@ classdef UI < matlab.apps.AppBase
             app.ResetCartButton = uibutton(app.UIFigure, 'push');
             app.ResetCartButton.ButtonPushedFcn = createCallbackFcn(app, @ResetCartButtonPushed, true);
             app.ResetCartButton.FontSize = 16;
-            app.ResetCartButton.Position = [204 92 100 26];
-            app.ResetCartButton.Text = 'Reset Cart';
+            app.ResetCartButton.Position = [204 92 150 26];
+            app.ResetCartButton.Text = 'Stop & Save Data';
+            app.ResetCartButton.Enable = 'off';
    
             % Create InitialAngledegSliderLabel
             app.InitialAngledegSliderLabel = uilabel(app.UIFigure);
