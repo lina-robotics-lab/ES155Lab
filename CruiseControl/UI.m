@@ -389,8 +389,8 @@ classdef UI < matlab.apps.AppBase
             % Initialize default control input u.
             app.frame_rate= 15;% Update the animation at frame_rate fps
             
-            app.default_Kx=100;
-            app.default_Kv = 50;
+            app.default_Kx=20;
+            app.default_Kv = 10;
             app.default_KIx = 0;
             
             % Create UIFigure and components
